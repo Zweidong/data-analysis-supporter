@@ -1,0 +1,5 @@
+{
+  "name": "DataMind Agent",
+  "description": "An intelligent AI agent that automatically parses CSV data, generates interactive dashboards, and allows you to converse with your data using dynamic visualizations.",
+  "requestFramePermissions": []
+}
