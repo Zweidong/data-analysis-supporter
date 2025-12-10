@@ -2,8 +2,14 @@ import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { DashboardAnalysis, ChartConfig, ChatMessage, DataPoint } from '../types';
 import { getSampleData } from '../utils/csvParser';
 
-// Initialize Gemini Client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Helper to get client instance safely
+const getAIClient = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    throw new Error("API Key is missing. Please check your Vercel Environment Variables.");
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
 // Define the schema for the initial dashboard analysis
 const chartSchema: Schema = {
@@ -49,6 +55,7 @@ const chatResponseSchema: Schema = {
 };
 
 export const analyzeDataset = async (data: DataPoint[]): Promise<DashboardAnalysis> => {
+  const ai = getAIClient();
   const sample = getSampleData(data, 30);
   const columns = Object.keys(data[0] || {}).join(', ');
 
@@ -93,14 +100,9 @@ export const chatWithData = async (
   userMessage: string, 
   data: DataPoint[]
 ): Promise<{ text: string, chart?: ChartConfig }> => {
-  
+  const ai = getAIClient();
   const sample = getSampleData(data, 20);
   const columns = Object.keys(data[0] || {}).join(', ');
-
-  // Construct chat history for context
-  // We simplify history to save tokens, just keeping the last few turns if needed, 
-  // but for this implementation, we'll just send the current context + user query to keep it stateless/simple for the API call structure
-  // In a production app, we would pass the 'history' array mapped to Content objects.
 
   const prompt = `
     You are a Data Analyst Agent. 
